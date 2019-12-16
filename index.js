@@ -12,8 +12,8 @@ app.use(bodyParser.json());
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 
 const connection = mongoose.connection;
-connection.on('error', () => {
-  console.log('Connection error');
+connection.on('error', err => {
+  console.log('Connection error', + err);
 });
 connection.once('open', () => {
   console.log('Connected with database');
