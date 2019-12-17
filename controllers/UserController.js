@@ -1,8 +1,13 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const {registerValidation, loginValidation} = require('../utils/validationSchema');
 
 const user = {
   userRegister: async (req, res) => {
+
+    const {error} = registerValidation(req.body);
+    if(error) {return res.status(422).send(`Problem with data validation: ${error}`)}
+
     const isAlreadyCreated = await User.findOne({ email: req.body.email });
     if (isAlreadyCreated)
       return res.status(400).send('Account with this email already exists');
@@ -18,6 +23,7 @@ const user = {
 
     try {
       const savedUser = await user.save();
+      console.log(savedUser);
       res.status(201).send(savedUser);
     } catch (err) {
       res.status(500).send(err);
