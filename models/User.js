@@ -15,6 +15,22 @@ const userSchema = new mongoose.Schema({
     required: true,
     max: 1024
   },
+  name: {
+    type: String,
+    required: true
+  },
+  lastName: {
+    type: String,
+    required: true
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
   createdDate: {
     type: Date,
     default: Date.now

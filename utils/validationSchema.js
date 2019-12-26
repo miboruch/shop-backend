@@ -11,7 +11,19 @@ const registerValidation = body => {
       .email(),
     password: Joi.string().regex(
       /^(?=.*\d)(?=.*[a-z])[\w~@#$%^&*+=`|{}:;!.?\"()\[\]-]{8,25}$/
-    )
+    ),
+    name: Joi.string()
+      .min(2)
+      .required(),
+    lastName: Joi.string()
+      .min(2)
+      .required(),
+    city: Joi.string()
+      .min(2)
+      .required(),
+    address: Joi.string()
+      .min(2)
+      .required()
   };
   return Joi.validate(body, validationSchema);
 };
