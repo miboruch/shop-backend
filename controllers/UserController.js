@@ -55,18 +55,40 @@ const user = {
     );
     if (!validPassword) return res.status(400).send('Invalid password');
 
-    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
+      expiresIn: 15 * 60
+    });
     res.header('auth-token', token).send(token);
   },
   userLogout: (req, res) => {
     res.removeHeader('auth-token');
     res.send('User logout');
   },
-  getUserInfo: async (req, res) => {
-    const {_id} = req.user;
-    const user = await User.findOne({_id: _id});
+  userUpdate: async (req, res) => {
+    const { _id } = req.user;
 
-    if(!user) { return res.status(404).send('User not found')}
+    const updatedUser = await User.updateOne(
+      { _id: _id },
+      {
+        name: req.body.name,
+        lastName: req.body.lastName,
+        city: req.body.city,
+        address: req.body.address
+      }
+    );
+    if (!updatedUser) {
+      return res.status(404).send('Could not update');
+    }
+    console.log('Modified: ' + updatedUser.n);
+    res.status(200).send('Updated');
+  },
+  getUserInfo: async (req, res) => {
+    const { _id } = req.user;
+    const user = await User.findOne({ _id: _id });
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
 
     res.send(user);
   }
