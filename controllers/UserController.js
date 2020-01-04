@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const socket = require('../socket');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const {
@@ -58,6 +59,7 @@ const user = {
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
       expiresIn: 15 * 60
     });
+    socket.getIO().emit('userLogged', { token });
     res.header('auth-token', token).send(token);
   },
   userLogout: (req, res) => {
