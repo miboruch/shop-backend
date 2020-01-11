@@ -29,13 +29,12 @@ const product = {
       userID: req.user._id,
       name: req.body.name,
       description: req.body.description,
-      price: req.body.price
+      price: req.body.price,
+      image: req.file.location
     });
 
     try {
       const savedProduct = await newProduct.save();
-      const updatedAllProducts = await Product.find();
-      console.log(updatedAllProducts);
 
       socket.getIO().emit('productAdded', {savedProduct: savedProduct});
 
@@ -54,14 +53,15 @@ const product = {
     } else {
       res.status(200).send('Deleted product successfully');
 
-      socket.getIO().emit('productRemoved', {removedProduct: removedProduct})
-
+      socket.getIO().emit('productRemoved', { removedProduct: removedProduct });
     }
   },
   getSpecificProduct: async (req, res) => {
-    const foundProduct = await Product.find({_id: req.params.id});
+    const foundProduct = await Product.find({ _id: req.params.id });
 
-    if(!foundProduct) { res.status(404).send('Product not found')}
+    if (!foundProduct) {
+      res.status(404).send('Product not found');
+    }
 
     res.status(200).send(foundProduct);
   }
