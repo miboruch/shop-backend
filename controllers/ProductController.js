@@ -1,4 +1,4 @@
-const Product = require('../models/Product');
+const Product = require('../models/Product').Product;
 const socket = require('../socket');
 
 const product = {
@@ -57,7 +57,7 @@ const product = {
     }
   },
   getSpecificProduct: async (req, res) => {
-    const foundProduct = await Product.find({ _id: req.params.id });
+    const foundProduct = await Product.findOne({ _id: req.params.id });
 
     if (!foundProduct) {
       res.status(404).send('Product not found');
