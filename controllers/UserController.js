@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const {
   registerValidation,
   loginValidation
-} = require('../utils/validationSchema');
+} = require('../utils/accountValidationSchema');
 
 const user = {
   userRegister: async (req, res) => {

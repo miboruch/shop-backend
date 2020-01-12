@@ -3,7 +3,6 @@ const product = require('../controllers/ProductController');
 const privateRoute = require('../middlewares/private');
 const upload = require('../services/imageUpload');
 
-
 router.get('/getAll', product.getAllProducts);
 router.get('/getUserProducts', privateRoute, product.getAllUserProducts);
 router.post('/addProduct', privateRoute, upload.single('image'), product.addProduct);

@@ -34,11 +34,11 @@ const product = {
     });
 
     try {
-      const savedProduct = await newProduct.save();
+      const addedProduct = await newProduct.save();
 
-      socket.getIO().emit('productAdded', {savedProduct: savedProduct});
+      socket.getIO().emit('productAdded', {addedProduct: addedProduct});
 
-      res.status(200).send(savedProduct);
+      res.status(200).send(addedProduct);
     } catch (error) {
       res.status(500).send(error);
     }
