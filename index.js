@@ -28,7 +28,7 @@ connection.on('error', err => {
 });
 connection.once('open', () => {
   console.log('Connected with database');
-  const server = app.listen(process.env.PORT || 3000, () =>
+  const server = app.listen(process.env.PORT || 8000, () =>
     console.log('Server is up')
   );
   const io = socket.init(server);

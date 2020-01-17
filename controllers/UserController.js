@@ -15,8 +15,12 @@ const user = {
     }
 
     const isAlreadyCreated = await User.findOne({ email: req.body.email });
-    if (isAlreadyCreated)
-      return res.status(400).send('Account with this email already exists');
+    const isLoginInDatabase = await User.findOne({ login: req.body.login });
+    if (isAlreadyCreated || isLoginInDatabase) {
+      return res
+        .status(409)
+        .send('Account with this email or login already exists');
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -33,8 +37,9 @@ const user = {
 
     try {
       const savedUser = await user.save();
+      const token = jwt.sign({ _id: savedUser._id }, process.env.TOKEN_SECRET);
       console.log(savedUser);
-      res.status(201).send(savedUser);
+      res.status(201).send({ ...savedUser, token: token });
     } catch (err) {
       res.status(500).send(err);
     }
@@ -58,7 +63,7 @@ const user = {
 
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
     socket.getIO().emit('userLogged', { token });
-    res.header('auth-token', token).send({token: token, id: user._id});
+    res.header('auth-token', token).send({ token: token, id: user._id });
   },
   userLogout: (req, res) => {
     res.removeHeader('auth-token');
