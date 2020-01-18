@@ -9,5 +9,6 @@ router.post('/addProduct', privateRoute, upload.single('image'), product.addProd
 router.post('/removeProduct', privateRoute, product.removeProduct);
 router.get('/getSpecificProduct/:id', product.getSpecificProduct);
 router.get('/getAllCategoryProducts/:category', product.getAllCategoryProducts);
+router.get('/search/:query', product.getSearchedProducts);
 
 module.exports = router;

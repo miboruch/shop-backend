@@ -35,7 +35,7 @@ const product = {
     }
   },
   addProduct: async (req, res) => {
-    const userLogin = await User.findOne({_id: req.user._id});
+    const userLogin = await User.findOne({ _id: req.user._id });
 
     const newProduct = new Product({
       userID: req.user._id,
@@ -67,7 +67,7 @@ const product = {
     } else {
       res.status(200).send('Deleted product successfully');
 
-      socket.getIO().emit('productRemoved', { removedProduct: removedProduct });
+      socket.getIO().emit('productRemoved', { productId: removedProduct._id });
     }
   },
   getSpecificProduct: async (req, res) => {
@@ -78,6 +78,15 @@ const product = {
     }
 
     res.status(200).send(foundProduct);
+  },
+  getSearchedProducts: async (req, res) => {
+    const query = req.params.query.split('_').join(' ');
+    const products = await Product.find({ name: {$regex: `.*${query}.*`} });
+
+    if (!products) {
+      res.status(404).send('Products not found');
+    }
+    res.status(200).send(products);
   }
 };
 
