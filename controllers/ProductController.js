@@ -67,7 +67,7 @@ const product = {
     } else {
       res.status(200).send('Deleted product successfully');
 
-      socket.getIO().emit('productRemoved', { productId: removedProduct._id });
+      socket.getIO().emit('productRemoved', { removedProductId: removedProduct._id });
     }
   },
   getSpecificProduct: async (req, res) => {

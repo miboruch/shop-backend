@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const socket = require('./socket');
 require('dotenv').config();
+const Product = require('./models/Product').Product;
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
@@ -34,9 +35,39 @@ connection.once('open', () => {
   const io = socket.init(server);
   io.on('connection', socket => {
     console.log('User connected');
-    io.on('disconnect', () => {
-      console.log('User had left');
+    socket.on('disconnect', () => {
+      console.log('Disconnected');
+      // io.sockets.emit('unreserveAll');
     });
+    socket.on('productReservation', async ({productId}) => {
+      try{
+        await Product.updateOne(
+            { _id: productId }, {reserved: true}
+        );
+        io.sockets.emit('productReserved', {productId});
+
+        setTimeout(async () => {
+          const foundProduct = await Product.findOne({_id: productId});
+          if(!foundProduct){
+            console.log('Product does not exists anymore')
+          }else{
+            io.sockets.emit('productUnreserved', {productId});
+          }
+        }, 15 * 60 * 1000)
+      }catch(error){
+        console.log(error);
+      }
+    });
+    socket.on('productDeleteReservation', async ({productId}) => {
+      try{
+        await Product.updateOne(
+            { _id: productId }, {reserved: false}
+        );
+        io.sockets.emit('productUnreserved', {productId});
+      }catch(error){
+        console.log(error);
+      }
+    })
   });
   app.use('/user', authRoutes);
   app.use('/product', productRoutes);
