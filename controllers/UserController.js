@@ -38,7 +38,6 @@ const user = {
     try {
       const savedUser = await user.save();
       const token = jwt.sign({ _id: savedUser._id }, process.env.TOKEN_SECRET);
-      console.log(savedUser);
       res.status(201).send({ ...savedUser, token: token });
     } catch (err) {
       res.status(500).send(err);
@@ -51,7 +50,6 @@ const user = {
     }
 
     const user = await User.findOne({ email: req.body.email });
-    console.log(user);
     if (!user)
       return res.status(400).send('Account with this email does not exists');
 
@@ -84,7 +82,6 @@ const user = {
     if (!updatedUser) {
       return res.status(404).send('Could not update');
     }
-    console.log('Modified: ' + updatedUser.n);
     res.status(200).send('Updated');
   },
   getUserInfo: async (req, res) => {

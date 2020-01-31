@@ -23,6 +23,8 @@ app.use((req, res, next) => {
 
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 
+let runTimeout = false;
+
 const connection = mongoose.connection;
 connection.on('error', err => {
   console.log('Connection error', +err);
@@ -34,40 +36,48 @@ connection.once('open', () => {
   );
   const io = socket.init(server);
   io.on('connection', socket => {
-    console.log('User connected');
-    socket.on('disconnect', () => {
-      console.log('Disconnected');
-      // io.sockets.emit('unreserveAll');
-    });
-    socket.on('productReservation', async ({productId}) => {
-      try{
-        await Product.updateOne(
-            { _id: productId }, {reserved: true}
+    socket.on('productReservation', async ({ productId }) => {
+      runTimeout = true;
+      try {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { _id: productId },
+          { reserved: true },
+          { returnNewDocument: true }
         );
-        io.sockets.emit('productReserved', {productId});
+        io.sockets.emit('productReserved', { updatedProduct });
 
-        setTimeout(async () => {
-          const foundProduct = await Product.findOne({_id: productId});
-          if(!foundProduct){
-            console.log('Product does not exists anymore')
-          }else{
-            io.sockets.emit('productUnreserved', {productId});
-          }
-        }, 15 * 60 * 1000)
-      }catch(error){
+        if (runTimeout) {
+          setTimeout(async () => {
+            const foundProduct = await Product.findOne({ _id: productId });
+            if (!foundProduct) {
+              console.log('Product does not exists anymore');
+            } else {
+              const expiredProduct = await Product.findOneAndUpdate(
+                { _id: productId },
+                { reserved: false },
+                { returnNewDocument: true, useFindAndModify: false }
+              );
+              io.sockets.emit('productTimeout', { expiredProduct });
+            }
+          }, 15 * 60 * 1000);
+        }
+      } catch (error) {
         console.log(error);
       }
     });
-    socket.on('productDeleteReservation', async ({productId}) => {
-      try{
-        await Product.updateOne(
-            { _id: productId }, {reserved: false}
+    socket.on('productDeleteReservation', async ({ productId }) => {
+      runTimeout = false;
+      try {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { _id: productId },
+          { reserved: false },
+          { returnNewDocument: true }
         );
-        io.sockets.emit('productUnreserved', {productId});
-      }catch(error){
+        io.sockets.emit('productUnreserved', { updatedProduct });
+      } catch (error) {
         console.log(error);
       }
-    })
+    });
   });
   app.use('/user', authRoutes);
   app.use('/product', productRoutes);
