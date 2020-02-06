@@ -14,10 +14,7 @@ const product = {
   getAllUserProducts: async (req, res) => {
     try {
       const userProducts = await Product.find({ userID: req.user._id });
-      res.status(200).send({
-        count: userProducts.length,
-        products: userProducts
-      });
+      res.status(200).send(userProducts);
     } catch (error) {
       res.status(500).send(error);
     }

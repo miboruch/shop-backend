@@ -80,7 +80,7 @@ const user = {
       }
     );
     if (!updatedUser) {
-      return res.status(404).send('Could not update');
+      return res.status(400).send('Could not update');
     }
     res.status(200).send('Updated');
   },

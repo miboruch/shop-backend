@@ -24,6 +24,7 @@ app.use((req, res, next) => {
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 
 let runTimeout = false;
+let timeout;
 
 const connection = mongoose.connection;
 connection.on('error', err => {
@@ -47,10 +48,10 @@ connection.once('open', () => {
         io.sockets.emit('productReserved', { updatedProduct });
 
         if (runTimeout) {
-          setTimeout(async () => {
+          timeout = setTimeout(async () => {
             const foundProduct = await Product.findOne({ _id: productId });
             if (!foundProduct) {
-              console.log('Product does not exists anymore');
+              throw new Error('Product does not exists anymore');
             } else {
               const expiredProduct = await Product.findOneAndUpdate(
                 { _id: productId },
@@ -59,7 +60,7 @@ connection.once('open', () => {
               );
               io.sockets.emit('productTimeout', { expiredProduct });
             }
-          }, 15 * 60 * 1000);
+          }, 0.1 * 60 * 1000);
         }
       } catch (error) {
         console.log(error);
@@ -67,6 +68,7 @@ connection.once('open', () => {
     });
     socket.on('productDeleteReservation', async ({ productId }) => {
       runTimeout = false;
+      clearTimeout(timeout);
       try {
         const updatedProduct = await Product.findOneAndUpdate(
           { _id: productId },
