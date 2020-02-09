@@ -60,7 +60,7 @@ connection.once('open', () => {
               );
               io.sockets.emit('productTimeout', { expiredProduct });
             }
-          }, 0.1 * 60 * 1000);
+          }, 15 * 60 * 1000);
         }
       } catch (error) {
         console.log(error);
