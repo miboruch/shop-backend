@@ -15,24 +15,24 @@ const user = {
     }
 
     const isAlreadyCreated = await User.findOne({ email: req.body.email });
-    const isLoginInDatabase = await User.findOne({ login: req.body.login });
-    if (isAlreadyCreated || isLoginInDatabase) {
+
+    if (isAlreadyCreated) {
       return res
         .status(409)
-        .send('Account with this email or login already exists');
+        .send('Account with this email already exists');
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const user = new User({
-      login: req.body.login,
       email: req.body.email,
       password: hashedPassword,
       name: req.body.name,
       lastName: req.body.lastName,
       city: req.body.city,
-      address: req.body.address
+      address: req.body.address,
+      country: req.body.country
     });
 
     try {
@@ -76,13 +76,14 @@ const user = {
         name: req.body.name,
         lastName: req.body.lastName,
         city: req.body.city,
-        address: req.body.address
+        address: req.body.address,
+        country: req.body.country
       }
     );
     if (!updatedUser) {
       return res.status(400).send('Could not update');
     }
-    res.status(200).send('Updated');
+    res.status(200).send(updatedUser);
   },
   getUserInfo: async (req, res) => {
     const { _id } = req.user;

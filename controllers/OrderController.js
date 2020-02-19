@@ -1,11 +1,11 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
 const socket = require('../socket');
+const Product = require('../models/Product').Product;
 
 const order = {
   createOrder: async (req, res) => {
     const orderStaticData = {
-      userID: req.body.userID,
       cart: req.body.cart,
       totalPrice: req.body.totalPrice
     };
@@ -14,18 +14,26 @@ const order = {
       const user = await User.findOne({ _id: req.body.userID });
 
       if (!user) {
-        res.status(404).send('User with this ID was not found');
+        res.status(400).send('User with this ID was not found');
       } else {
         const order = new Order({
           ...orderStaticData,
+          userID: req.body.userID,
           name: user.name,
           lastName: user.lastName,
           email: user.email,
-          address: user.address,
-          city: user.city
+          address: req.body.address,
+          city: req.body.city,
+          country: req.body.country
         });
         try {
           const newOrder = await order.save();
+          req.body.cart.map(async item => {
+            await Product.findOneAndDelete({
+              _id: item._id
+            });
+          });
+
           socket
             .getIO()
             .emit('productOrdered', { orderedProduct: req.body.cart });
@@ -42,11 +50,17 @@ const order = {
         lastName: req.body.lastName,
         email: req.body.email,
         address: req.body.address,
-        city: req.body.city
+        city: req.body.city,
+        country: req.body.country
       });
 
       try {
         const newOrder = await order.save();
+        req.body.cart.map(async item => {
+          await Product.findOneAndDelete({
+            _id: item._id
+          });
+        });
         socket
           .getIO()
           .emit('productOrdered', { orderedProduct: req.body.cart });

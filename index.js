@@ -23,7 +23,6 @@ app.use((req, res, next) => {
 
 mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
 
-let runTimeout = false;
 let timeout;
 
 const connection = mongoose.connection;
@@ -38,19 +37,18 @@ connection.once('open', () => {
   const io = socket.init(server);
   io.on('connection', socket => {
     socket.on('productReservation', async ({ productId }) => {
-      runTimeout = true;
       try {
         const updatedProduct = await Product.findOneAndUpdate(
           { _id: productId },
           { reserved: true },
-          { returnNewDocument: true }
+          { returnNewDocument: true, useFindAndModify: false }
         );
+
         io.sockets.emit('productReserved', { updatedProduct });
 
-        if (runTimeout) {
+        if (updatedProduct) {
           timeout = setTimeout(async () => {
-            const foundProduct = await Product.findOne({ _id: productId });
-            if (!foundProduct) {
+            if (!updatedProduct) {
               throw new Error('Product does not exists anymore');
             } else {
               const expiredProduct = await Product.findOneAndUpdate(
@@ -67,7 +65,6 @@ connection.once('open', () => {
       }
     });
     socket.on('productDeleteReservation', async ({ productId }) => {
-      runTimeout = false;
       clearTimeout(timeout);
       try {
         const updatedProduct = await Product.findOneAndUpdate(
@@ -76,6 +73,20 @@ connection.once('open', () => {
           { returnNewDocument: true }
         );
         io.sockets.emit('productUnreserved', { updatedProduct });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    socket.on('resetCart', ({ cart }) => {
+      try {
+        cart.map(async item => {
+          await Product.findOneAndUpdate(
+            { _id: item._id },
+            { reserved: false },
+            { returnNewDocument: true }
+          );
+          io.sockets.emit('resetCartFinish', { cart });
+        });
       } catch (error) {
         console.log(error);
       }

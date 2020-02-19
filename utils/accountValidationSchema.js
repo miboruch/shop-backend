@@ -2,9 +2,6 @@ const Joi = require('joi');
 
 const registerValidation = body => {
   const validationSchema = {
-    login: Joi.string()
-      .min(3)
-      .required(),
     email: Joi.string()
       .min(6)
       .required()
@@ -23,7 +20,9 @@ const registerValidation = body => {
       .required(),
     address: Joi.string()
       .min(2)
-      .required()
+      .required(),
+    country: Joi.string()
+        .required(),
   };
   return Joi.validate(body, validationSchema);
 };

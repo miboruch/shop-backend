@@ -6,7 +6,6 @@ module.exports = async (req, res, next) => {
 
   try {
     req.user = jwt.verify(token, process.env.TOKEN_SECRET);
-    console.log(req.user);
     next();
   } catch (error) {
     res.status(404).send('Invalid token');

@@ -33,6 +33,14 @@ const orderSchema = new mongoose.Schema({
   address: {
     type: String,
     required: true
+  },
+  country: {
+    type: String,
+    required: true
+  },
+  createdDate: {
+    type: Date,
+    default: Date.now
   }
 });
 

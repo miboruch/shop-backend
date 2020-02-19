@@ -7,10 +7,6 @@ const productSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     required: true
   },
-  userLogin: {
-    type: String,
-    required: true
-  },
   category: {
     type: String,
     enum: PRODUCT_CATEGORY,

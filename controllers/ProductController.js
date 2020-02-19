@@ -43,11 +43,8 @@ const product = {
     }
   },
   addProduct: async (req, res) => {
-    const userLogin = await User.findOne({ _id: req.user._id });
-
     const newProduct = new Product({
       userID: req.user._id,
-      userLogin: userLogin.login,
       name: req.body.name,
       description: req.body.description,
       price: req.body.price,
